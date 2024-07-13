@@ -21,19 +21,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - uses: seanmiddleditch/gha-setup-ninja@v5
     - name: Clone Qt6 repo
       run: |
         git clone https://code.qt.io/qt/qt5.git qt6 -b '${{env.QT6_VERSION}}'
         cd qt6
         perl init-repository -f --module-subset=qtbase
 
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      if: contains(matrix.os, 'windows')
+
     - name: Build Qt6 (Windows)
       if: contains(matrix.os, 'windows')
-      shell: cmd
       run: |
         mkdir qt6_build
         cd qt6_build
-        "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvarsall.bat" amd64
         ..\qt6\configure.bat -release -static -optimize-size -prefix "..\qt6_static_64" -no-feature-accessibility
         cmake --build . --parallel 4
         cmake --install .
