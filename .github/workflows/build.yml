@@ -38,6 +38,8 @@ jobs:
 
     - name: Build Qt6 (Windows)
       if: contains(matrix.os, 'windows')
+      env:
+        CL: /MP # Build with multiple processes
       run: |
         mkdir qt6_build
         cd qt6_build
