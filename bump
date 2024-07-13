@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+from argparse import ArgumentParser
+from pathlib import Path
+import re
+import subprocess
+
+
+def get_latest_build_number(version: str) -> int:
+    result = subprocess.run(["git", "tag"], stdout=subprocess.PIPE, encoding="utf-8")
+    tags = result.stdout.splitlines()
+
+    latest_tag_number = 0
+    for tag in tags:
+        match = re.match(rf"^{version}-(\d+)$", tag)
+        if match:
+            number = int(match.group(1))
+            if number > latest_tag_number:
+                latest_tag_number = number
+
+    return latest_tag_number
+
+
+def bump_version(version: str | None = None) -> None:
+    workflow_path = Path(__file__).parent / ".github" / "workflows" / "build.yml"
+    with workflow_path.open() as f:
+        workflow_content = f.read()
+
+    match = re.search(r"QT6_VERSION: ([\d.]+)", workflow_content)
+    if match is None:
+        print("Failed to extract Qt version.")
+        return
+    old_version = match[1]
+    if old_version == version:
+        print("The old version is the same as the new version!")
+        return
+    if version is None:
+        build_number = get_latest_build_number(old_version) + 1
+        tag_name = f"{old_version}-{build_number}"
+    else:
+        tag_name = version
+        with workflow_path.open("w") as f:
+            f.write(re.sub(old_version, version))
+    subprocess.run(["git", "commit", "-a", "--allow-empty", "-m", tag_name])
+    subprocess.run(["git", "tag", tag_name, "-m", tag_name])
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("version", default=None, nargs="?")
+    args = parser.parse_args()
+    bump_version(args.version)
