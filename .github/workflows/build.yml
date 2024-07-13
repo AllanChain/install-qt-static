@@ -25,7 +25,7 @@ jobs:
       run: |
         git clone https://code.qt.io/qt/qt5.git qt6 -b '${{env.QT6_VERSION}}'
         cd qt6
-        perl init-repository -f --module-subset=qtbase,qtdeclarative,qttranslations,qtimageformats,qtsvg
+        perl init-repository -f --module-subset=qtbase
 
     - name: Build Qt6 (Windows)
       if: contains(matrix.os, 'windows')
