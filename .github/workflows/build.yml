@@ -30,7 +30,7 @@ jobs:
       run: |
         git clone https://code.qt.io/qt/qt5.git qt6 -b '${{env.QT6_VERSION}}'
         cd qt6
-        perl init-repository -f --module-subset=qtbase
+        perl init-repository -f --module-subset=essential
 
     - name: Set up MSVC
       uses: ilammy/msvc-dev-cmd@v1
