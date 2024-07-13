@@ -2,6 +2,9 @@ name: Build static Qt
 
 on: push
 
+env:
+  QT6_VERSION: 6.7.2
+
 jobs:
   build:
     strategy:
@@ -20,11 +23,11 @@ jobs:
     - uses: actions/checkout@v4
     - name: Clone Qt6 repo
       run: |
-        git clone https://code.qt.io/qt/qt5.git qt6 -b 6.7.2
+        git clone https://code.qt.io/qt/qt5.git qt6 -b '${{env.QT6_VERSION}}'
         cd qt6
-        perl init-repository -f --module-subset=essential
+        perl init-repository -f --module-subset=qtbase,qtdeclarative,qttranslations,qtimageformats,qtsvg
 
-    - name: Configure Qt6 (Windows)
+    - name: Build Qt6 (Windows)
       if: contains(matrix.os, 'windows')
       shell: cmd
       run: |
@@ -32,18 +35,16 @@ jobs:
         cd qt6_build
         "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvarsall.bat" amd64
         ..\qt6\configure.bat -release -static -optimize-size -prefix "..\qt6_static_64" -no-feature-accessibility
+        cmake --build . --parallel 4
+        cmake --install .
 
-    - name: Configure Qt6 (macOS)
+    - name: Build Qt6 (macOS)
       if: contains(matrix.os, 'macos')
       run: |
         mkdir qt6_build
         cd qt6_build
         ../qt6/configure -static -release -optimize-size -prefix "../qt6_static_64" -no-feature-accessibility -- -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-
-    - name: Built Qt6
-      run: |
-        cd qt6_build
-        cmake --build . --parallel
+        cmake --build . --parallel 3
         cmake --install .
 
     - name: Package binaries
