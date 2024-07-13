@@ -56,23 +56,21 @@ jobs:
 
     - name: Package binaries
       run: |
-        7z a qt6_static_64.zip qt6_static_64
+        7z a qt-${{env.QT6_VERSION}}-static-${{matrix.os-caption}}.zip qt6_static_64
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
-        name: "qt6_static_${{matrix.os-caption}}"
-        path: qt6_static_64.zip
+        name: qt6-static-${{matrix.os-caption}}
+        path: qt-*.zip
 
   release:
     runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/download-artifact@v4
-      - name: Rename artifacts
-        run: |
-          mkdir release
-          mv qt6_static_macos/qt6_static_64.zip release/qt6-static-${{env.QT6_VERSION}}-macos.zip
-          mv qt6_static_windows/qt6_static_64.zip release/qt6-static-${{env.QT6_VERSION}}-windows.zip
+        with:
+          path: release
+          merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
           files: release/*

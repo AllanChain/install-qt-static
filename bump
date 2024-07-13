@@ -11,7 +11,7 @@ def get_latest_build_number(version: str) -> int:
 
     latest_tag_number = 0
     for tag in tags:
-        match = re.match(rf"^{version}-(\d+)$", tag)
+        match = re.match(rf"^v{version}-(\d+)$", tag)
         if match:
             number = int(match.group(1))
             if number > latest_tag_number:
@@ -40,8 +40,8 @@ def bump_version(version: str | None = None) -> None:
         tag_name = version
         with workflow_path.open("w") as f:
             f.write(re.sub(old_version, version))
-    subprocess.run(["git", "commit", "-a", "--allow-empty", "-m", tag_name])
-    subprocess.run(["git", "tag", tag_name, "-m", tag_name])
+    subprocess.run(["git", "commit", "-a", "--allow-empty", "-m", f"release v{tag_name}"])
+    subprocess.run(["git", "tag", f"v{tag_name}", "-m", tag_name])
 
 
 if __name__ == "__main__":
