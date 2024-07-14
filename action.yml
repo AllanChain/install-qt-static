@@ -27,4 +27,4 @@ runs:
           echo "$(pwd)/qt_static/bin" >> $GITHUB_PATH
         fi
       env:
-        VERSION_TAG: v6.7.2-3
+        VERSION_TAG: v6.7.2-4
