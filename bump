@@ -54,7 +54,7 @@ def bump_version(version: str | None = None) -> None:
         with workflow_path.open("w") as f:
             f.write(workflow_content.replace(workflow_version, version))
     with action_path.open("w") as f:
-        f.write(re.sub(r"VERSION_TAG: [\d.-]+", f"VERSION_TAG: {tag_name}", action_content))
+        f.write(re.sub(r"VERSION_TAG: [\d.-]+", f"VERSION_TAG: {tag_name[1:]}", action_content))
     subprocess.run(
         ["git", "commit", "-a", "--allow-empty", "-m", f"release {tag_name}"]
     )
