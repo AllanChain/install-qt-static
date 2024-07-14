@@ -24,46 +24,48 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: seanmiddleditch/gha-setup-ninja@v5
-    - name: Clone Qt repo
-      run: |
-        git clone https://code.qt.io/qt/qt5.git qt -b '${{env.QT_VERSION}}'
-        cd qt
-        perl init-repository -f --module-subset=essential,qt5compat,qt3d,qtcharts,qtimageformats,qtmqtt,qtmultimedia,qtnetworkauth,qtquick3d,qtquicktimeline,qtserialbus,qtserialport,qtshadertools,qtsvg,qtwebchannel,qtwebengine,qtwebsockets,qtwebview
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: seanmiddleditch/gha-setup-ninja@v5
+      - name: Clone Qt repo
+        run: |
+          git clone https://code.qt.io/qt/qt5.git qt -b '${{env.QT_VERSION}}'
+          cd qt
+          perl init-repository -f --module-subset=essential,qt5compat,qt3d,qtcharts,qtimageformats,qtmqtt,qtmultimedia,qtnetworkauth,qtquick3d,qtquicktimeline,qtserialbus,qtserialport,qtshadertools,qtsvg,qtwebchannel,qtwebengine,qtwebsockets,qtwebview
 
-    - name: Set up MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-      if: contains(matrix.os, 'windows')
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        if: contains(matrix.os, 'windows')
 
-    - name: Build Qt (Windows)
-      if: contains(matrix.os, 'windows')
-      env:
-        CL: /MP # Build with multiple processes
-      run: |
-        mkdir qt_build
-        cd qt_build
-        ..\qt\configure.bat -release -static -optimize-size -prefix "..\qt_static" -no-feature-accessibility
-        cmake --build . --parallel 4
-        cmake --install .
+      - name: Build Qt (Windows)
+        if: contains(matrix.os, 'windows')
+        env:
+          CL: /MP # Build with multiple processes
+        run: |
+          mkdir qt_build
+          cd qt_build
+          ..\qt\configure.bat -release -static -optimize-size -prefix "..\qt_static" -no-feature-accessibility
+          cmake --build . --parallel 4
+          cmake --install .
 
-    - name: Build Qt (macOS)
-      if: contains(matrix.os, 'macos')
-      run: |
-        mkdir qt_build
-        cd qt_build
-        ../qt/configure -static -release -optimize-size -prefix "../qt_static" -no-feature-accessibility -- -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-        cmake --build . --parallel 3
-        cmake --install .
+      - name: Build Qt (macOS)
+        if: contains(matrix.os, 'macos')
+        run: |
+          mkdir qt_build
+          cd qt_build
+          ../qt/configure -static -release -optimize-size -prefix "../qt_static" -no-feature-accessibility -- -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          cmake --build . --parallel 3
+          cmake --install .
 
-    - name: Package binaries
-      run: |
-        7z a qt-${{env.QT_VERSION}}-static-${{matrix.os-caption}}.zip qt_static
+      - name: Package binaries
+        run: |
+          7z a qt-${{env.QT_VERSION}}-static-${{matrix.os-caption}}.zip qt_static
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: qt-static-${{matrix.os-caption}}
-        path: qt-*.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qt-static-${{matrix.os-caption}}
+          path: qt-*.zip
 
   release:
     runs-on: ubuntu-latest
@@ -76,3 +78,13 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: release/*
+      - name: Shorthand tags
+        run: |
+          git config --global user.email "27856297+dependabot-preview[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git tag -d v$QT_VERSION || true
+          git tag v$QT_VERSION
+          git push -f origin v$QT_VERSION
+          git tag -d v${QT_VERSION%.*} || true
+          git tag v${QT_VERSION%.*}
+          git push -f origin v${QT_VERSION%.*}

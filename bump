@@ -17,22 +17,6 @@ def get_latest_build_number(version: str, tags: list[str]) -> int:
     return latest_tag_number
 
 
-def make_tag_names(version: str, build_number: int) -> list[str]:
-    """Create tag names based on version number and build number.
-
-    Given version 6.7.2 and build number 1, this will generate:
-    - v6.7.2-1
-    - v6.7.2
-    - v6.7
-
-    v6 will not be generated as it is the branch name
-    """
-    parts = version.split(".")
-    return [f"v{version}-{build_number}"] + [
-        "v" + ".".join(parts[: i + 1]) for i in range(1, len(parts))
-    ]
-
-
 def bump_version(version: str | None = None) -> None:
     workflow_path = Path(__file__).parent / ".github" / "workflows" / "build.yml"
     action_path = Path(__file__).parent /"action.yml"
@@ -64,25 +48,22 @@ def bump_version(version: str | None = None) -> None:
     ).stdout.splitlines()
     if version is None:
         build_number = get_latest_build_number(workflow_version, old_tags) + 1
-        tag_names = make_tag_names(workflow_version, build_number)
+        tag_name = f"v{version}-{build_number}"
     else:
-        tag_names = make_tag_names(version, 1)
+        tag_name = f"v{version}-1"
         with workflow_path.open("w") as f:
             f.write(workflow_content.replace(workflow_version, version))
     with action_path.open("w") as f:
-        f.write(re.sub(r"VERSION_TAG: [\d.-]+", f"VERSION_TAG: {tag_names[0]}", action_content))
+        f.write(re.sub(r"VERSION_TAG: [\d.-]+", f"VERSION_TAG: {tag_name}", action_content))
     subprocess.run(
-        ["git", "commit", "-a", "--allow-empty", "-m", f"release {tag_names[0]}"]
+        ["git", "commit", "-a", "--allow-empty", "-m", f"release {tag_name}"]
     )
-    for tag_name in tag_names:
-        if tag_name in old_tags:
-            subprocess.run(["git", "tag", "-d", tag_name])
-        subprocess.run(["git", "tag", tag_name, "-m", tag_name])
+    if tag_name in old_tags:
+        subprocess.run(["git", "tag", "-d", tag_name])
+    subprocess.run(["git", "tag", tag_name, "-m", tag_name])
 
     if input("Push [Y/n]") in ["y", "Y", ""]:
         subprocess.run(["git", "push", "--follow-tags"])
-        for tag_name in tag_names:
-            subprocess.run(["git", "push", "origin", tag_name, "--force"])
 
 
 if __name__ == "__main__":
