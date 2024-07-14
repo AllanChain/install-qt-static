@@ -26,28 +26,42 @@ def make_tag_names(version: str, build_number: int) -> list[str]:
 
 def bump_version(version: str | None = None) -> None:
     workflow_path = Path(__file__).parent / ".github" / "workflows" / "build.yml"
+    action_path = Path(__file__).parent /"action.yml"
+
     with workflow_path.open() as f:
         workflow_content = f.read()
-
     match = re.search(r"QT_VERSION: ([\d.]+)", workflow_content)
     if match is None:
         print("Failed to extract Qt version.")
         return
-    old_version = match[1]
-    if old_version == version:
+    workflow_version = match[1]
+    if workflow_version == version:
         print("The old version is the same as the new version!")
+        return
+
+    with action_path.open() as f:
+        action_content = f.read()
+    match = re.search(r"VERSION_TAG: ([\d.]+)", action_content)
+    if match is None:
+        print("action.yml is malformed.")
+        return
+    action_version=match[1]
+    if action_version != workflow_version:
+        print(f"Workflow and action not match: {workflow_version} vs {action_version}")
         return
 
     old_tags = subprocess.run(
         ["git", "tag"], stdout=subprocess.PIPE, encoding="utf-8"
     ).stdout.splitlines()
     if version is None:
-        build_number = get_latest_build_number(old_version, old_tags) + 1
-        tag_names = make_tag_names(old_version, build_number)
+        build_number = get_latest_build_number(workflow_version, old_tags) + 1
+        tag_names = make_tag_names(workflow_version, build_number)
     else:
         tag_names = make_tag_names(version, 1)
         with workflow_path.open("w") as f:
-            f.write(re.sub(old_version, version))
+            f.write(workflow_content.replace(workflow_version, version))
+    with action_path.open("w") as f:
+        f.write(re.sub(r"VERSION_TAG: [\d.-]+", f"VERSION_TAG: {tag_names[0]}", action_content))
     subprocess.run(
         ["git", "commit", "-a", "--allow-empty", "-m", f"release v{tag_names[0]}"]
     )
@@ -55,7 +69,11 @@ def bump_version(version: str | None = None) -> None:
         if tag_name in old_tags:
             subprocess.run(["git", "tag", "-d", tag_name])
         subprocess.run(["git", "tag", tag_name, "-m", tag_name])
-        subprocess.run(["git", "push", "origin", tag_name, "--force"])
+
+    if input("Push [Y/n]") in ["y", "Y", ""]:
+        subprocess.run(["git", "push", "--follow-tags"])
+        for tag_name in tag_names:
+            subprocess.run(["git", "push", "origin", tag_name, "--force"])
 
 
 if __name__ == "__main__":
@@ -63,5 +81,3 @@ if __name__ == "__main__":
     parser.add_argument("version", default=None, nargs="?")
     args = parser.parse_args()
     bump_version(args.version)
-    if input("Push [Y/n]") in ["y", "Y", ""]:
-        subprocess.run(["git", "push", "--follow-tags"])

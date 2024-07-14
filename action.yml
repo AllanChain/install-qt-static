@@ -1,0 +1,26 @@
+name: Install Static Qt
+description: Install the static build of Qt
+runs:
+  using: "composite"
+  steps:
+    - name: Install Static Qt
+      shell: bash
+      run: |
+        if [[ $(uname) == "Linux" ]]; then
+          echo "Linux is not supported"
+          exit 1
+        elif [[ $(uname) == "Darwin" ]]; then
+          os_name=macos
+        elif [[ $(uname) == "MINGW"* ]]; then
+          os_name=windows
+        else
+          echo "Unknown operating system"
+          exit 1
+        fi
+        qt_version=${VERSION_TAG#*v}
+        qt_version=${qt_version%-*}
+        curl -LO https://github.com/AllanChain/static-qt6/releases/download/${VERSION_TAG}/qt-${qt_version}-static-${os_name}.zip
+        7z x qt-*.zip
+        echo "$(pwd)/qt_static/bin" >> $GITHUB_PATH
+      env:
+        VERSION_TAG: 6.7.2-2
