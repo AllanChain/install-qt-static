@@ -3,7 +3,7 @@ name: Build static Qt
 on:
   push:
     tags:
-      - '*'
+      - '*-*' # Only tags with build number
 permissions:
   contents: write
 env:
