@@ -18,9 +18,18 @@ def get_latest_build_number(version: str, tags: list[str]) -> int:
 
 
 def make_tag_names(version: str, build_number: int) -> list[str]:
+    """Create tag names based on version number and build number.
+
+    Given version 6.7.2 and build number 1, this will generate:
+    - v6.7.2-1
+    - v6.7.2
+    - v6.7
+
+    v6 will not be generated as it is the branch name
+    """
     parts = version.split(".")
     return [f"v{version}-{build_number}"] + [
-        "v" + ".".join(parts[: i + 1]) for i in range(len(parts))
+        "v" + ".".join(parts[: i + 1]) for i in range(1, len(parts))
     ]
 
 
@@ -63,7 +72,7 @@ def bump_version(version: str | None = None) -> None:
     with action_path.open("w") as f:
         f.write(re.sub(r"VERSION_TAG: [\d.-]+", f"VERSION_TAG: {tag_names[0]}", action_content))
     subprocess.run(
-        ["git", "commit", "-a", "--allow-empty", "-m", f"release v{tag_names[0]}"]
+        ["git", "commit", "-a", "--allow-empty", "-m", f"release {tag_names[0]}"]
     )
     for tag_name in tag_names:
         if tag_name in old_tags:
