@@ -36,7 +36,7 @@ def bump_version(version: str | None = None) -> None:
     ).stdout.splitlines()
     if version is None:
         build_number = get_latest_build_number(action_version, old_tags) + 1
-        tag_name = f"v{version}-{build_number}"
+        tag_name = f"v{action_version}-{build_number}"
     else:
         tag_name = f"v{version}-1"
     with action_path.open("w") as f:
@@ -47,6 +47,7 @@ def bump_version(version: str | None = None) -> None:
     if tag_name in old_tags:
         subprocess.run(["git", "tag", "-d", tag_name])
     subprocess.run(["git", "tag", tag_name, "-m", tag_name])
+    print(subprocess.check_output(["git", "show", tag_name], encoding="utf-8"))
 
     if input("Push [Y/n]") in ["y", "Y", ""]:
         subprocess.run(["git", "push", "--follow-tags"])
