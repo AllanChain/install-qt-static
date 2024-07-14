@@ -6,8 +6,6 @@ on:
       - '*-*' # Only tags with build number
 permissions:
   contents: write
-env:
-  QT_VERSION: 6.7.2
 
 jobs:
   build:
@@ -27,6 +25,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Find Qt version
+        shell: python
+        run: |
+          import re
+          import os
+
+          with open("action.yml") as f:
+            action_content = f.read()
+          match = re.search(r"VERSION_TAG: v([\d.]+)", action_content)
+          print("Found Qt version:", match[1])
+          with open(os.environ["GITHUB_ENV"], "a") as f:
+            f.write("QT_VERSION=" + match[1])
+
       - uses: seanmiddleditch/gha-setup-ninja@v5
       - name: Clone Qt repo
         run: |
