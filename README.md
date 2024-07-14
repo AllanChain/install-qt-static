@@ -8,6 +8,11 @@ This action will install and set up a static version of Qt.
 Statically linking Qt can often drastically reduce your binary size, and makes deploying the app easier. However, Qt does not provide official static builds. This repo builds static Qt libraries and provide a GitHub Action to use them. An example usage looks like this:
 ```yaml
     - uses: AllanChain/install-qt-static@v6
+    - name: Build app
+      run: |
+        # Use qt-cmake to automatically use the toolchain
+        qt-cmake .
+        cmake --build .
 ```
 The version of the action is the same as the version of Qt. See tags and releases for a full list of built Qt libraries. For example, you can use Qt 6.7.2 with
 ```yaml
