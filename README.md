@@ -72,3 +72,7 @@ jobs:
          name: "myapp (${{matrix.os-caption}})"
          path: ./release/*
 ```
+
+## Developement
+
+The [build action](.github/workflows/build.yml) builds and releases Qt builds with a tag is pushed. The version is stored in `action.yml`. To update the version, you need to run `./bump <version>`. To rebuild, you need to run `./bump`.
