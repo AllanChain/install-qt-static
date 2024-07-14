@@ -2,6 +2,9 @@
 
 This action will install and set up a static version of Qt.
 
+> Many thanks to [@gmh5225](https://github.com/gmh5225)'s work.
+> The code is developed based on https://github.com/gmh5225/static-build-qt6
+
 Statically linking Qt can often drastically reduce your binary size, and makes deploying the app easier. However, Qt does not provide official static builds. This repo builds static Qt libraries and provide a GitHub Action to use them. An example usage looks like this:
 ```yaml
     - uses: AllanChain/install-qt-static@v6
