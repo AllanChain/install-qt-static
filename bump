@@ -38,7 +38,8 @@ def bump_version(version: str | None = None) -> None:
         build_number = get_latest_build_number(action_version, old_tags) + 1
         tag_name = f"v{action_version}-{build_number}"
     else:
-        tag_name = f"v{version}-1"
+        build_number = get_latest_build_number(version, old_tags) + 1
+        tag_name = f"v{version}-{build_number}"
     with action_path.open("w") as f:
         f.write(re.sub("VERSION_TAG: .+", f"VERSION_TAG: {tag_name}", action_content))
     subprocess.run(
