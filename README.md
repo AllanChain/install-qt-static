@@ -22,7 +22,7 @@ The version of the action is the same as the version of Qt. See tags and release
 
 This repo only provide Windows (amd64) and macOS (x86_64 and arm64) builds. Linux builds are not included because Linux Qt apps prefer dynamic linking.
 
-Only `qtbase` is included in the binaries. If you need more Qt libraries, you can fork this repo and add your own.
+Only `qtbase`, `qtdeclarative`, `qtsvg`, `qtshadertools`, `qtmultimedia`, `qttools` are included in the binaries. If you need more Qt libraries, you can fork this repo and add your own.
 
 ## Example workflow
 
