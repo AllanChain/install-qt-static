@@ -41,7 +41,7 @@ jobs:
         run: |
           git clone https://code.qt.io/qt/qt5.git qt -b '${{env.QT_VERSION}}'
           cd qt
-          perl init-repository.pl -f --module-subset=qtbase,qtdeclarative,qtsvg,qtshadertools,qtmultimedia,qttools
+          perl init-repository.pl -f --module-subset=qtbase,qtdeclarative,qtsvg,qtshadertools,qtmultimedia,qttools,qttranslations
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
