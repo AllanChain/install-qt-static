@@ -12,7 +12,12 @@ runs:
         elif [[ $(uname) == "Darwin" ]]; then
           os_name=macos
         elif [[ $(uname) == "MINGW"* ]]; then
-          os_name=windows
+          arch=$(uname -m)
+          if [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
+              os_name=windows-arm
+          else
+              os_name=windows
+          fi
         else
           echo "Unknown operating system"
           exit 1
