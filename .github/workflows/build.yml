@@ -56,7 +56,9 @@ jobs:
         run: |
           mkdir qt_build
           cd qt_build
-          ..\qt\configure.bat -release -static -optimize-size -prefix "..\qt_static" -no-feature-accessibility -- -DCMAKE_CXX_FLAGS="/await:strict"
+          ..\qt\configure.bat -list-features
+          $configArgs = Get-Content ..\feature-flags.txt | Where-Object { $_.Trim() -ne '' }
+          ..\qt\configure.bat @configArgs -- -DCMAKE_CXX_FLAGS="/await:strict"
           cmake --build . --parallel 4
           cmake --install .
 
@@ -65,7 +67,8 @@ jobs:
         run: |
           mkdir qt_build
           cd qt_build
-          ../qt/configure -release -static -optimize-size -prefix "../qt_static" -no-feature-accessibility -- -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          ../qt/configure -list-features
+          ../qt/configure $(cat ../feature-flags.txt) -- -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
           cmake --build . --parallel 3
           cmake --install .
 

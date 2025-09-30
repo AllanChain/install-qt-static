@@ -1,0 +1,15 @@
+-prefix
+../qt_static
+-release
+-static
+-optimize-size
+-no-feature-windeployqt
+-no-feature-macdeployqt
+-no-feature-androiddeployqt
+-no-feature-valgrind
+-no-feature-testlib
+-no-feature-qdoc
+-no-feature-qdbus
+-no-feature-designer
+-no-feature-assistant
+-no-feature-pixeltool
