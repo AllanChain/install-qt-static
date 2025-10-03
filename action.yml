@@ -6,27 +6,18 @@ runs:
     - name: Install Static Qt
       shell: bash
       run: |
-        if [[ $(uname) == "Linux" ]]; then
-          echo "Linux is not supported"
-          exit 1
-        elif [[ $(uname) == "Darwin" ]]; then
-          os_name=macos
-        elif [[ $(uname) == "MINGW"* ]]; then
-          arch=$(uname -m)
-          if [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
-              os_name=windows-arm
-          else
-              os_name=windows
-          fi
-        else
-          echo "Unknown operating system"
-          exit 1
-        fi
+        os_name=""
+        case "${{ runner.os }}" in
+          Linux)   echo "Linux not supported"; exit 1 ;;
+          macOS)   os_name=macos ;;
+          Windows) [ "${{ runner.arch }}" = "ARM64" ] && os_name=windows-arm || os_name=windows ;;
+          *)       echo "Unknown OS"; exit 1 ;;
+        esac
         qt_version=${VERSION_TAG#*v}
         qt_version=${qt_version%-*}
         curl -LO https://github.com/AllanChain/install-qt-static/releases/download/${VERSION_TAG}/qt-${qt_version}-static-${os_name}.zip
         7z x qt-*.zip
-        if [[ $os_name == "windows" ]]; then
+        if [[ $os_name == windows* ]]; then
           echo "$(pwd -W | sed 's,/,\\,g')\qt_static\bin" >> $GITHUB_PATH
         else
           echo "$(pwd)/qt_static/bin" >> $GITHUB_PATH
