@@ -61,7 +61,7 @@ jobs:
           CL: /MP # Build with multiple processes
         run: |
           $configArgs = Get-Content ..\feature-flags.txt | Where-Object { $_.Trim() -ne '' }
-          ..\qt\configure.bat @configArgs -- -DCMAKE_CXX_FLAGS="/await:strict"
+          ..\qt\configure.bat @configArgs -- -DCMAKE_CXX_FLAGS="/await:strict" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
           cmake --build . --parallel 4
 
       - name: Build Qt (macOS)
