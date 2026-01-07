@@ -24,7 +24,15 @@ This repo only provide Windows (amd64) and macOS (x86_64 and arm64) builds. Linu
 
 Only `qtbase`, `qtdeclarative`, `qtsvg`, `qtshadertools`, `qtmultimedia`, `qttools` are included in the binaries. If you need more Qt libraries, you can fork this repo and add your own.
 
-## Example workflow
+## Windows-specific CMake Configuration
+
+When using this action to build Qt applications on Windows, your project requires specific CMake configuration changes to ensure proper static linking. You must include the following in your CMake setup:
+
+- Set `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded` (or equivalent CMake statement)
+- Add `cmake_policy(SET CMP0091 NEW)`
+- Use `cmake_minimum_required(VERSION 3.15)` or higher
+
+## Example Workflow
 
 ```yaml
 name: Build
