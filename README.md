@@ -44,11 +44,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-2025, macos-26]
         include:
-        - os: windows-latest
+        - os: windows-2025
           os-caption: windows
-        - os: macos-latest
+        - os: macos-26
           os-caption: macos
 
     runs-on: ${{matrix.os}}

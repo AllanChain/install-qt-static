@@ -11,9 +11,9 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, windows-11-arm, macos-26]
+        os: [windows-2025, windows-11-arm, macos-26]
         include:
-        - os: windows-latest
+        - os: windows-2025
           os-caption: windows
           arch: x64
         - os: windows-11-arm
